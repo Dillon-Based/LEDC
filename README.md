@@ -9,3 +9,7 @@ A simple test suite is provided to exercise the automation logic with mocked Air
 ```bash
 node airtable.test.js
 ```
+
+The automation expects the ID of the triggering **Individual Gives** record. The
+script looks for an input variable named `giveId`, but it will also accept
+`recordId` or `giveid` for convenience.

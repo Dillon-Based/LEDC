@@ -36,6 +36,7 @@ async function createBenefitOwed({ giveId, base, log = console.log }) {
 module.exports = { createBenefitOwed };
 
 if (typeof input !== 'undefined' && typeof base !== 'undefined') {
-    const { giveId } = input.config();
+    const cfg = input.config();
+    const giveId = cfg.giveId || cfg.recordId || cfg.giveid;
     createBenefitOwed({ giveId, base }).catch(error => { throw error; });
 }
