@@ -47,7 +47,10 @@ async function createBenefitOwed({ giveId, base, log = console.log }) {
     log('Benefits Owed records created successfully.');
 }
 
-module.exports = { createBenefitOwed };
+// Export for tests when running in Node
+if (typeof module !== 'undefined') {
+    module.exports = { createBenefitOwed };
+}
 
 if (typeof input !== 'undefined' && typeof base !== 'undefined') {
     const cfg = input.config();
