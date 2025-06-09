@@ -4,16 +4,14 @@
 // record in the "Benefits Owed" table linking back to the original
 // record via the "Gives" field.
 
-let { giveId } = input.config();
+async function createBenefitOwed({ giveId, base, log = console.log }) {
+    if (typeof giveId !== 'string' || !giveId) {
+        throw new Error("Invalid or missing 'giveId'. Check your automation setup.");
+    }
 
-if (typeof giveId !== 'string' || !giveId) {
-    throw new Error("Invalid or missing 'giveId'. Check your automation setup.");
-}
+    const givesTable = base.getTable('Individual Gives');
+    const benefitsOwedTable = base.getTable('Benefits Owed');
 
-const givesTable = base.getTable('Individual Gives');
-const benefitsOwedTable = base.getTable('Benefits Owed');
-
-(async () => {
     // Fetch the record that triggered the automation
     const giveRecord = await givesTable.selectRecordAsync(giveId);
     if (!giveRecord) {
@@ -23,7 +21,7 @@ const benefitsOwedTable = base.getTable('Benefits Owed');
     // Example condition: a checkbox field named "Create Benefit Owed" is checked
     const shouldCreate = giveRecord.getCellValue('Create Benefit Owed');
     if (!shouldCreate) {
-        console.log('Condition not met. No Benefits Owed record created.');
+        log('Condition not met. No Benefits Owed record created.');
         return;
     }
 
@@ -32,5 +30,12 @@ const benefitsOwedTable = base.getTable('Benefits Owed');
         'Gives': [{ id: giveRecord.id }]
     });
 
-    console.log('Benefits Owed record created successfully.');
-})();
+    log('Benefits Owed record created successfully.');
+}
+
+module.exports = { createBenefitOwed };
+
+if (typeof input !== 'undefined' && typeof base !== 'undefined') {
+    const { giveId } = input.config();
+    createBenefitOwed({ giveId, base }).catch(error => { throw error; });
+}
