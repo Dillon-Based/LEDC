@@ -25,12 +25,26 @@ async function createBenefitOwed({ giveId, base, log = console.log }) {
         return;
     }
 
-    // Create the Benefits Owed record and link it back to the triggering give
-    await benefitsOwedTable.createRecordAsync({
-        'Gives': [{ id: giveRecord.id }]
-    });
+    // Lookup benefits from the Campaign table via a field on the give record
+    const campaignBenefits =
+        giveRecord.getCellValue('Campaign Benefits') || [];
+    const benefits = Array.isArray(campaignBenefits)
+        ? campaignBenefits
+        : [campaignBenefits];
 
-    log('Benefits Owed record created successfully.');
+    for (const benefit of benefits.filter(Boolean)) {
+        const benefitId =
+            typeof benefit === 'object' && benefit !== null
+                ? benefit.id
+                : benefit;
+        const fields = { 'Gives': [{ id: giveRecord.id }] };
+        if (benefitId) {
+            fields['Campaign Benefit'] = [{ id: benefitId }];
+        }
+        await benefitsOwedTable.createRecordAsync(fields);
+    }
+
+    log('Benefits Owed records created successfully.');
 }
 
 module.exports = { createBenefitOwed };

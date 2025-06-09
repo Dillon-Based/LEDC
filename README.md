@@ -1,6 +1,6 @@
 # LEDC
 
-This repository contains a small Airtable automation script. The script checks a record in the **Individual Gives** table and, when a condition is met, creates a related record in **Benefits Owed**.
+This repository contains a small Airtable automation script. The script checks a record in the **Individual Gives** table and, when a condition is met, creates records in **Benefits Owed**. Each benefit listed on the give record (looked up from the related Campaign) is inserted as its own record and linked back to the original give via the **Gives** field.
 
 ## Running tests
 

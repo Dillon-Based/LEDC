@@ -2,7 +2,7 @@ const assert = require('assert');
 const { createBenefitOwed } = require('./airtable');
 
 async function testCreatesRecord() {
-    let created = null;
+    const createdRecords = [];
     const base = {
         getTable(name) {
             if (name === 'Individual Gives') {
@@ -14,6 +14,9 @@ async function testCreatesRecord() {
                                 if (field === 'Create Benefit Owed') {
                                     return true;
                                 }
+                                if (field === 'Campaign Benefits') {
+                                    return [{ id: 'ben1' }, { id: 'ben2' }];
+                                }
                                 return undefined;
                             }
                         };
@@ -22,7 +25,7 @@ async function testCreatesRecord() {
             } else if (name === 'Benefits Owed') {
                 return {
                     async createRecordAsync(fields) {
-                        created = fields;
+                        createdRecords.push(fields);
                     }
                 };
             }
@@ -30,11 +33,14 @@ async function testCreatesRecord() {
     };
 
     await createBenefitOwed({ giveId: 'rec123', base, log: () => {} });
-    assert.deepStrictEqual(created, { 'Gives': [{ id: 'rec123' }] });
+    assert.deepStrictEqual(createdRecords, [
+        { 'Gives': [{ id: 'rec123' }], 'Campaign Benefit': [{ id: 'ben1' }] },
+        { 'Gives': [{ id: 'rec123' }], 'Campaign Benefit': [{ id: 'ben2' }] }
+    ]);
 }
 
 async function testSkipsWhenConditionFalse() {
-    let created = null;
+    const createdRecords = [];
     const logs = [];
     const base = {
         getTable(name) {
@@ -55,7 +61,7 @@ async function testSkipsWhenConditionFalse() {
             } else if (name === 'Benefits Owed') {
                 return {
                     async createRecordAsync(fields) {
-                        created = fields;
+                        createdRecords.push(fields);
                     }
                 };
             }
@@ -63,7 +69,7 @@ async function testSkipsWhenConditionFalse() {
     };
 
     await createBenefitOwed({ giveId: 'rec456', base, log: msg => logs.push(msg) });
-    assert.strictEqual(created, null);
+    assert.deepStrictEqual(createdRecords, []);
     assert.ok(logs.includes('Condition not met. No Benefits Owed record created.'));
 }
 
